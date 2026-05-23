@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -26,7 +27,7 @@ class Product extends Model
 		'price' => 'decimal:2',
 		'compare_price' => 'decimal:2'
 	];
-	
+
 	// accessors
 	public function getImageUrlAttribute()
 	{
@@ -46,6 +47,47 @@ class Product extends Model
 
 	// appends use with accessor
 	protected $appends = [
-		'image_url','on_sale'
+		'image_url',
+		'on_sale'
 	];
+
+	// Scopes
+	public function scopeActive($query)
+	{
+		return $query->where('is_active', true);
+	}
+
+	public function scopeInStock($query)
+	{
+		return $query->where('stock', '>', 0);
+	}
+
+
+	// Relationships
+	public function orderItems()
+	{
+		return $this->hasMany(OrderItems::class);
+	}
+
+	// Event lifecycle hook
+	protected static function booted()
+	{
+		static::creating(function ($product) {
+			if (empty($product->slug)) {
+				$slug = Str::slug($product->name);
+				$count = 1;
+
+				while (Product::where('slug', $slug)->exists()) {
+					$slug = Str::slug($product->name) . '-' . $count;
+					$count++;
+				}
+
+				$product->slug = $slug;
+			}
+
+			if (empty($product->sku)) {
+				$product->sku = 'SKU-' . strtoupper(uniqid());
+			}
+		});
+	}
 }
