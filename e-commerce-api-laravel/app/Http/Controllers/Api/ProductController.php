@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -67,9 +68,26 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        // Retrieved validated format data
+        $data = $request->validated();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $filename = time() . '_' . uniqid() . '.' . $request->file('image')
+                ->getClientOriginalExtension();
+            $data['image'] = $request->file('image')->storeAs('products', $filename, 'public');
+        }
+
+        // Create query
+        $product = Product::create($data);
+
+        return response()->json([
+            'success'=>true,
+            'message'=>'Product created successfully',
+            'data'=>new ProductResource($product)
+        ], 201);
     }
 
     /**
