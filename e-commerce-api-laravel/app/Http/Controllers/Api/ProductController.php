@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class ProductController extends Controller
             $query->where(function ($q) use ($search) {
                $q->where('name', 'ilike', "%{$search}%")
                    ->orWhere('description', 'ilike', "%{$search}%")
-                   ->orWhere('sku', 'ilike', "%{$search}%")
+                   ->orWhere('sku', 'ilike', "%{$search}%");
             });
         }
 
@@ -93,24 +94,63 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $slug)
     {
-        //
+        // Fetch query
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => new ProductResource($product)
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        // Retrieved validated data format
+        $data = $request->validated();
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image
+            // has(), input(), hasFile() only used on Request object
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $filename = time(). '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            $data['image'] = $request->file('image')->storeAs('products', $filename, 'public');
+        }
+
+        // Update query
+        $product->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'data' => new ProductResource($product->fresh())
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        //
+        // Delete image
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        // Delete query
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product deleted successfully'
+        ]);
     }
 }
