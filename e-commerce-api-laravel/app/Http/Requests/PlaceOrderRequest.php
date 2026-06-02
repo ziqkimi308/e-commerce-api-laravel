@@ -43,11 +43,11 @@ class PlaceOrderRequest extends FormRequest
 
 	# Custom validation error messages
 	public function messages()
-	{ {
+	{
 			return [
 				'items.required' => 'You must add at least one item to your order',
 				'items.*.product_id.exists' => 'One or more products are invalid',
 				'items.*.quantity.min' => 'Quantity must be at least 1',
 			];
 	}
-}
+
