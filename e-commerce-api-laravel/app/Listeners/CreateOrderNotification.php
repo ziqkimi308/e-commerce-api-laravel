@@ -3,11 +3,12 @@
 namespace App\Listeners;
 
 use App\Events\OrderPlace;
+use App\Events\OrderPlaced;
 use App\Notifications\OrderPlacedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class CreateOrderNotification
+class CreateOrderNotification implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -20,7 +21,7 @@ class CreateOrderNotification
     /**
      * Handle the event.
      */
-    public function handle(OrderPlace $event): void
+    public function handle(OrderPlaced $event): void
     {
         $event->order->user->notify(new OrderPlacedNotification($event->order));
     }

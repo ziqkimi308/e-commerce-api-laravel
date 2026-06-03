@@ -19,7 +19,7 @@
             background: #4F46E5;
             color: white;
             padding: 20px;
-            text align: center;
+            text-align: center;
         }
 
         .content {
@@ -49,7 +49,7 @@
             text-align: center;
             padding: 20px;
             color: #6b7280;
-            font size: 0.9em;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -67,7 +67,7 @@
                 <h3>Order Details</h3>
                 <p><strong>Order Number:</strong> {{ $order->order_number }}
                 </p>
-                <p><strong>Order Date:</strong> {{ $order->created_at > format('M d, Y') }}</p>
+                <p><strong>Order Date:</strong> {{ $order->created_at->format('M d, Y') }}</p>
                 <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
                 <h3>Items:</h3>
                 @foreach ($order->items as $item)

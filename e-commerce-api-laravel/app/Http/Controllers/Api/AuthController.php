@@ -155,7 +155,7 @@ class AuthController extends Controller
 
         // Send reset link
         // This link also includes generated unique token for password reset purpose
-        $status = Password::sendResetLink($validated['email']);
+        $status = Password::sendResetLink($validated);
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
                 'success' => true,
